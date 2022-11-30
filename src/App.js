@@ -1,23 +1,82 @@
-import logo from './logo.svg';
+import Header from './components/Header'
+import Main from './components/Main'
+import List from './components/List'
 import './App.css';
+import data from './data'
+import {useState} from 'react';
 
 function App() {
+    const { players } = data;
+    const [viewingPlayers, setViewingPlayers] = useState(players);
+    const [cartItems, setCartItems] = useState([]);
+    const [isSorted, setSorted] = useState(false);
+    const [status, setStatus] = useState(0);
+    const [isOld, setIsOld] = useState(0);
+    const [isReset, setReset] = useState(false);
+
+    const applyStatusFilter = (num) => {
+        if (status === num) {
+            setStatus(0);
+        }
+        else {
+            setStatus(num)
+        }
+        setReset(false)
+    }
+    const applyAgeFilter = (num) => {
+        if (isOld === num) {
+            setIsOld(0);
+        }
+        else {
+            setIsOld(num)
+        }
+        setReset(false)
+    }
+
+    const onAdd = (player) => {
+        const exist = cartItems.find((current) => current.id === player.id);
+        if (!exist) {
+            const newCartItems = [...cartItems, { ...player}]
+            setCartItems(newCartItems);
+        }
+    }
+    const onRemove = (player) => {
+        const exist = cartItems.find((current) => current.id === player.id);
+        if (exist) {
+            const newCartItems = cartItems.filter((current) => current.id !== player.id);
+            setCartItems(newCartItems);
+        }
+    }
+
+    const onClear = () => {
+        const newCartItems = [];
+        setCartItems(newCartItems);
+    }
+
+    const sortgrammys = () => {
+        if (isSorted) {
+            setSorted(false);
+        }
+        else {
+            const newViewingPlayers = viewingPlayers.sort((a,b) => b.grammys - a.grammys);
+            setViewingPlayers(newViewingPlayers)
+            setSorted(true);
+        }
+        setReset(false)
+    }
+
+    const onReset = () => {
+        setReset(true);
+        setStatus(0);
+        setIsOld(0);
+    }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Header countCartItems={cartItems.length}/>
+      <div className='row'>
+          <Main cartItems={cartItems} status={status} isOld={isOld} applyStatusFilter={applyStatusFilter} applyAgeFilter={applyAgeFilter} onAdd={onAdd} onRemove={onRemove} sortgrammys={sortgrammys} isSorted={isSorted} onReset={onReset} reset={isReset} players={viewingPlayers}/>
+          <List cartItems={cartItems} onAdd={onAdd} onRemove={onRemove} onClear={onClear}/>
+      </div>
     </div>
   );
 }
